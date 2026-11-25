@@ -12,13 +12,22 @@ ENTRY = (
 )
 
 
-def check_gate(text):
-    """Gate: /output/entry.txt is UTF-8 text of 1 to 200 characters."""
-    assert isinstance(text, str)
-    assert text.strip(), "entry must not be only white space"
-    assert 1 <= len(text) <= 200, "entry must be 1-200 characters"
-    assert "\n" not in text, "entry must be a single line"
+def validate(text):
+    """All gate checks live here: UTF-8 text, 1-200 chars, one line."""
+    if not isinstance(text, str):
+        raise ValueError("entry must be text")
+    if not text.strip():
+        raise ValueError("entry must not be only white space")
+    if not 1 <= len(text) <= 200:
+        raise ValueError("entry must be 1-200 characters")
+    if "\n" in text:
+        raise ValueError("entry must be a single line")
     return text
+
+
+def check_gate(text):
+    """Gate entry point — delegates every check to validate()."""
+    return validate(text)
 
 
 def main():
@@ -29,7 +38,8 @@ def main():
     with open(path, "w", encoding="utf-8") as f:
         f.write(text + "\n")
     with open(path, "r", encoding="utf-8") as f:
-        assert f.read() == text + "\n", "round-trip mismatch"
+        if f.read() != text + "\n":
+            raise ValueError("round-trip mismatch")
 
 
 if __name__ == "__main__":
